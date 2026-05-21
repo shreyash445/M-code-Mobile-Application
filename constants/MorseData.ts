@@ -50,7 +50,7 @@ export const LETTERS_TREE_DATA = {
   }
 };
 
-export const THEME = {
+export const DARK_THEME = {
   primary: '#d4a040',
   primaryActive: '#e8b850',
   primaryPale: '#2a2218',
@@ -73,3 +73,30 @@ export const THEME = {
   copper: '#b87333',
   signalGlow: '#e8a030',
 };
+
+export const LIGHT_THEME = {
+  primary: '#b8860b',
+  primaryActive: '#a07608',
+  primaryPale: '#fdf4d8',
+  primaryGlow: 'rgba(184, 134, 11, 0.12)',
+  ink: '#1a1a1a',
+  inkDeep: '#000000',
+  body: '#555555',
+  mute: '#999999',
+  canvas: '#f5f0e8',
+  canvasSoft: '#ffffff',
+  canvasWarm: '#e8e0d0',
+  positive: '#2a9d8f',
+  positiveDeep: '#1a6b62',
+  warning: '#d4872a',
+  warningDeep: '#8a5218',
+  negative: '#c0392b',
+  negativeDeep: '#8a281e',
+  negativeBg: '#fce8e6',
+  brassLight: '#f0d080',
+  copper: '#b87333',
+  signalGlow: '#e8a030',
+};
+
+export type ThemeColors = typeof DARK_THEME;
+export const THEME = DARK_THEME;

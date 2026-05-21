@@ -17,9 +17,9 @@ interface MorseTreeProps {
 
 export default function MorseTree({ currentPath }: MorseTreeProps) {
   const svgWidth = width - 40;
-  const svgHeight = 100;
-  const nodeRadius = 7;
-  const verticalSpacing = 22;
+  const svgHeight = 90;
+  const nodeRadius = 6;
+  const verticalSpacing = 18;
 
   const renderNode = (node: MorseNode, x: number, y: number, level: number, path: string) => {
     const isActive = currentPath === path;

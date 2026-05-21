@@ -17,7 +17,26 @@ import SignalLamp from '../../components/SignalLamp';
 const DOT_THRESHOLD = 200;
 const LETTER_SILENCE = 800;
 const WORD_SILENCE = 2000;
-const BEEP_URL = 'https://raw.githubusercontent.com/freeCodeCamp/cdn/master/build/testable-projects-fcc/audio/BeepSound.wav';
+
+const genBeep = (): string => {
+  const sr = 8000, freq = 800, n = Math.floor(sr * 0.08);
+  const buf = new ArrayBuffer(44 + n), v = new DataView(buf);
+  const w = (off: number, s: string) => { for (let i = 0; i < s.length; i++) v.setUint8(off + i, s.charCodeAt(i)); };
+  w(0, 'RIFF'); v.setUint32(4, 36 + n, true); w(8, 'WAVE'); w(12, 'fmt ');
+  v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+  v.setUint32(24, sr, true); v.setUint32(28, sr, true); v.setUint16(32, 1, true); v.setUint16(34, 8, true);
+  w(36, 'data'); v.setUint32(40, n, true);
+  for (let i = 0; i < n; i++) v.setUint8(44 + i, Math.floor((Math.sin(2 * Math.PI * freq * i / sr) * 0.5 + 0.5) * 255));
+  const b = new Uint8Array(buf), c = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+  let b64 = '';
+  for (let i = 0; i < b.length; i += 3) {
+    const b1 = b[i], b2 = i + 1 < b.length ? b[i + 1] : 0, b3 = i + 2 < b.length ? b[i + 2] : 0;
+    const t = (b1 << 16) | (b2 << 8) | b3;
+    b64 += c[(t >> 18) & 63] + c[(t >> 12) & 63] + (i + 1 < b.length ? c[(t >> 6) & 63] : '=') + (i + 2 < b.length ? c[t & 63] : '=');
+  }
+  return 'data:audio/wav;base64,' + b64;
+};
+const BEEP_DATA = genBeep();
 
 export default function TelegraphScreen() {
   const [currentPath, setCurrentPath] = useState('');
@@ -36,7 +55,10 @@ export default function TelegraphScreen() {
     let mounted = true;
     const loadSound = async () => {
       try {
-        const { sound } = await Audio.Sound.createAsync({ uri: BEEP_URL });
+        const { sound } = await Audio.Sound.createAsync(
+          { uri: BEEP_DATA },
+          { shouldPlay: false }
+        );
         if (mounted) soundRef.current = sound;
       } catch {
         // silent
@@ -102,7 +124,8 @@ export default function TelegraphScreen() {
     Vibration.vibrate(10);
     try {
       if (soundRef.current) {
-        await soundRef.current.replayAsync();
+        await soundRef.current.setPositionAsync(0);
+        await soundRef.current.playAsync();
       }
     } catch {
       // silent
@@ -115,7 +138,7 @@ export default function TelegraphScreen() {
     animateKeyPress(false);
     try {
       if (soundRef.current) {
-        await soundRef.current.stopAsync();
+        await soundRef.current.pauseAsync();
       }
     } catch {
       // silent
@@ -162,22 +185,37 @@ export default function TelegraphScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.hero}>
-        <Text style={styles.heroEyebrow}>Telegraph Key</Text>
-        <Text style={styles.heroTitle}>Tap the Key</Text>
-      </View>
-
-      <View style={styles.lampRow}>
-        <SignalLamp active={isPressing} size={28} />
-        <Text style={styles.lampStatus}>
-          {isPressing ? 'Transmitting' : 'Ready'}
-        </Text>
+      <View style={styles.topRow}>
+        <View style={styles.hero}>
+          <Text style={styles.heroEyebrow}>Telegraph Key</Text>
+          <Text style={styles.heroTitle}>Tap the Key</Text>
+        </View>
+        <View style={styles.lampBox}>
+          <SignalLamp active={isPressing} size={24} />
+          <Text style={[styles.lampStatus, isPressing && { color: THEME.primary }]}>
+            {isPressing ? 'TX' : 'RX'}
+          </Text>
+        </View>
       </View>
 
       <View style={styles.messageCard}>
         <View style={styles.messageHeader}>
-          <MaterialCommunityIcons name="message-text-outline" size={12} color={THEME.mute} />
+          <MaterialCommunityIcons name="message-text-outline" size={11} color={THEME.mute} />
           <Text style={styles.messageLabel}>Output</Text>
+          {currentPath.length > 0 && (
+            <View style={styles.pathPills}>
+              {currentPath.split('').map((s, i) => (
+                <View key={i} style={styles.pathPill}>
+                  <Text style={styles.pathPillText}>{s === '.' ? '\u25CF' : '\u2014'}</Text>
+                </View>
+              ))}
+            </View>
+          )}
+          {guessedLetter && (
+            <View style={styles.guessPill}>
+              <Text style={styles.guessPillText}>{guessedLetter}</Text>
+            </View>
+          )}
         </View>
         <Text style={styles.decodedText} numberOfLines={1}>
           {decodedMessage || 'Tap the key to begin...'}
@@ -187,29 +225,11 @@ export default function TelegraphScreen() {
         </Text>
       </View>
 
-      <View style={styles.treeSection}>
+      <View style={styles.midArea}>
         <MorseTree currentPath={currentPath} />
       </View>
 
       <View style={styles.footer}>
-        <View style={styles.hintBar}>
-          <View style={styles.pathDisplay}>
-            {currentPath.split('').map((s, i) => (
-              <View key={i} style={styles.pathSymbolWrap}>
-                <Text style={styles.pathSymbol}>{s === '.' ? '\u25CF' : '\u2014'}</Text>
-              </View>
-            ))}
-            {currentPath.length === 0 && (
-              <Text style={styles.pathPlaceholder}>Awaiting input</Text>
-            )}
-          </View>
-          {guessedLetter && (
-            <View style={styles.guessBadge}>
-              <Text style={styles.guessText}>{guessedLetter}</Text>
-            </View>
-          )}
-        </View>
-
         <Animated.View
           style={[
             styles.keyOuterGlow,
@@ -217,7 +237,7 @@ export default function TelegraphScreen() {
               shadowOpacity: keyGlow,
               shadowRadius: keyGlow.interpolate({
                 inputRange: [0, 1],
-                outputRange: [0, 18],
+                outputRange: [0, 14],
               }),
             },
           ]}
@@ -237,40 +257,38 @@ export default function TelegraphScreen() {
               onPressOut={handlePressOut}
               style={[styles.keyButton, isPressing && styles.keyButtonPressed]}
             >
-              <View style={styles.keyInner}>
-                <MaterialCommunityIcons
-                  name="lightning-bolt"
-                  size={26}
-                  color={isPressing ? THEME.canvas : THEME.primary}
-                />
-              </View>
+              <MaterialCommunityIcons
+                name="lightning-bolt"
+                size={28}
+                color={isPressing ? THEME.canvas : THEME.primary}
+              />
             </TouchableOpacity>
           </Animated.View>
         </Animated.View>
 
         <View style={styles.controlRow}>
           <TouchableOpacity style={styles.ctrlBtn} onPress={handleDelete} activeOpacity={0.6}>
-            <MaterialCommunityIcons name="backspace-outline" size={15} color={THEME.body} />
-            <Text style={styles.ctrlBtnText}>Delete</Text>
+            <MaterialCommunityIcons name="backspace-outline" size={14} color={THEME.body} />
+            <Text style={styles.ctrlBtnText}>Del</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.ctrlBtn} onPress={handleSpace} activeOpacity={0.6}>
-            <MaterialCommunityIcons name="arrow-right-bold" size={15} color={THEME.body} />
-            <Text style={styles.ctrlBtnText}>Space</Text>
+            <MaterialCommunityIcons name="arrow-right-bold" size={14} color={THEME.body} />
+            <Text style={styles.ctrlBtnText}>Spc</Text>
           </TouchableOpacity>
           <TouchableOpacity style={[styles.ctrlBtn, styles.clearBtn]} onPress={handleClear} activeOpacity={0.6}>
-            <MaterialCommunityIcons name="trash-can-outline" size={15} color={THEME.negative} />
-            <Text style={[styles.ctrlBtnText, { color: THEME.negative }]}>Clear</Text>
+            <MaterialCommunityIcons name="trash-can-outline" size={14} color={THEME.negative} />
+            <Text style={[styles.ctrlBtnText, { color: THEME.negative }]}>Clr</Text>
           </TouchableOpacity>
         </View>
 
-        <View style={styles.instructionRow}>
-          <View style={styles.instructionItem}>
-            <View style={[styles.instrDot, { width: 6, height: 6, borderRadius: 3 }]} />
-            <Text style={styles.instructionText}>Tap</Text>
+        <View style={styles.instrRow}>
+          <View style={styles.instrItem}>
+            <View style={styles.instrDot} />
+            <Text style={styles.instrText}>Tap = Dot</Text>
           </View>
-          <View style={styles.instructionItem}>
-            <View style={[styles.instrDash]} />
-            <Text style={styles.instructionText}>Hold</Text>
+          <View style={styles.instrItem}>
+            <View style={styles.instrDash} />
+            <Text style={styles.instrText}>Hold = Dash</Text>
           </View>
         </View>
       </View>
@@ -283,138 +301,129 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: THEME.canvas,
   },
+  topRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    paddingBottom: 4,
+  },
   hero: {
-    paddingHorizontal: 20,
-    paddingTop: 12,
-    marginBottom: 8,
+    flex: 1,
   },
   heroEyebrow: {
     color: THEME.primary,
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: '700',
-    letterSpacing: 2.5,
+    letterSpacing: 2,
     textTransform: 'uppercase',
-    marginBottom: 4,
+    marginBottom: 2,
   },
   heroTitle: {
     color: THEME.ink,
-    fontSize: 30,
+    fontSize: 22,
     fontWeight: '700',
-    letterSpacing: -0.5,
-    lineHeight: 32,
+    letterSpacing: -0.3,
     fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
   },
-  lampRow: {
-    flexDirection: 'row',
+  lampBox: {
     alignItems: 'center',
-    gap: 10,
-    paddingHorizontal: 20,
-    marginBottom: 10,
+    gap: 2,
+    paddingTop: 4,
   },
   lampStatus: {
     color: THEME.body,
-    fontSize: 12,
-    fontWeight: '600',
+    fontSize: 9,
+    fontWeight: '700',
+    letterSpacing: 1,
   },
   messageCard: {
     backgroundColor: THEME.canvasSoft,
-    borderRadius: 14,
-    padding: 12,
-    marginHorizontal: 20,
-    marginBottom: 8,
+    borderRadius: 12,
+    padding: 10,
+    marginHorizontal: 16,
+    marginBottom: 6,
     borderWidth: 1,
     borderColor: THEME.canvasWarm,
   },
   messageHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    marginBottom: 6,
+    gap: 4,
+    marginBottom: 4,
+    flexWrap: 'wrap',
   },
   messageLabel: {
     color: THEME.mute,
     fontSize: 9,
     fontWeight: '700',
-    letterSpacing: 1.2,
+    letterSpacing: 1,
     textTransform: 'uppercase',
+  },
+  pathPills: {
+    flexDirection: 'row',
+    gap: 2,
+    marginLeft: 6,
+  },
+  pathPill: {
+    backgroundColor: THEME.canvas,
+    paddingHorizontal: 4,
+    paddingVertical: 1,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: THEME.canvasWarm,
+  },
+  pathPillText: {
+    color: THEME.primary,
+    fontSize: 10,
+    fontWeight: '700',
+  },
+  guessPill: {
+    backgroundColor: THEME.primaryPale,
+    paddingHorizontal: 8,
+    paddingVertical: 1,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: THEME.primary,
+    marginLeft: 4,
+  },
+  guessPillText: {
+    color: THEME.primary,
+    fontSize: 11,
+    fontWeight: '800',
   },
   decodedText: {
     color: THEME.ink,
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '700',
-    lineHeight: 24,
+    lineHeight: 20,
     fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
-    marginBottom: 4,
+    marginBottom: 2,
   },
   morseHistory: {
     color: THEME.primary,
     fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
-    fontSize: 13,
-    letterSpacing: 4,
+    fontSize: 11,
+    letterSpacing: 3,
   },
-  treeSection: {
-    height: 110,
+  midArea: {
+    flex: 1,
     justifyContent: 'center',
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
     marginBottom: 4,
   },
   footer: {
     paddingHorizontal: 20,
-    paddingTop: 10,
-    paddingBottom: 8,
+    paddingTop: 8,
+    paddingBottom: 6,
     alignItems: 'center',
     backgroundColor: THEME.canvasSoft,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    borderTopLeftRadius: 18,
+    borderTopRightRadius: 18,
     borderWidth: 1,
     borderBottomWidth: 0,
     borderColor: THEME.canvasWarm,
-  },
-  hintBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    width: '100%',
-    marginBottom: 8,
-  },
-  pathDisplay: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    flex: 1,
-  },
-  pathSymbolWrap: {
-    backgroundColor: THEME.canvas,
-    paddingHorizontal: 4,
-    paddingVertical: 2,
-    borderRadius: 5,
-    borderWidth: 1,
-    borderColor: THEME.canvasWarm,
-  },
-  pathSymbol: {
-    color: THEME.primary,
-    fontSize: 13,
-    fontWeight: '700',
-  },
-  pathPlaceholder: {
-    color: THEME.mute,
-    fontSize: 11,
-    fontWeight: '600',
-  },
-  guessBadge: {
-    backgroundColor: THEME.primaryPale,
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 9999,
-    borderWidth: 1,
-    borderColor: THEME.primary,
-    marginLeft: 8,
-  },
-  guessText: {
-    color: THEME.primary,
-    fontSize: 15,
-    fontWeight: '800',
-    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
   },
   keyOuterGlow: {
     shadowColor: THEME.primary,
@@ -426,8 +435,8 @@ const styles = StyleSheet.create({
     padding: 3,
   },
   keyButton: {
-    width: 72,
-    height: 72,
+    width: 76,
+    height: 76,
     borderRadius: 9999,
     backgroundColor: THEME.canvas,
     justifyContent: 'center',
@@ -446,25 +455,21 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     elevation: 6,
   },
-  keyInner: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   controlRow: {
     flexDirection: 'row',
-    gap: 8,
+    gap: 6,
     width: '100%',
-    marginTop: 8,
+    marginTop: 6,
   },
   ctrlBtn: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 4,
-    paddingVertical: 10,
+    gap: 3,
+    paddingVertical: 8,
     backgroundColor: THEME.canvas,
-    borderRadius: 10,
+    borderRadius: 8,
     borderWidth: 1,
     borderColor: THEME.canvasWarm,
   },
@@ -474,32 +479,35 @@ const styles = StyleSheet.create({
   },
   ctrlBtnText: {
     color: THEME.body,
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: '700',
   },
-  instructionRow: {
+  instrRow: {
     flexDirection: 'row',
     justifyContent: 'center',
-    gap: 20,
-    marginTop: 6,
+    gap: 16,
+    marginTop: 4,
   },
-  instructionItem: {
+  instrItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
+    gap: 4,
   },
   instrDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
     backgroundColor: THEME.body,
   },
   instrDash: {
-    width: 13,
+    width: 12,
     height: 3,
     borderRadius: 2,
     backgroundColor: THEME.body,
   },
-  instructionText: {
+  instrText: {
     color: THEME.body,
-    fontSize: 10,
+    fontSize: 9,
     fontWeight: '600',
   },
 });

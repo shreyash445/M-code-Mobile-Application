@@ -10,7 +10,7 @@ const WORD_GAP = DOT_MS * 7;
 const generateBeepData = (): string => {
   const sampleRate = 8000;
   const frequency = 800;
-  const numSamples = Math.floor(sampleRate * 0.04);
+  const numSamples = Math.floor(sampleRate * 0.08);
   const buffer = new ArrayBuffer(44 + numSamples);
   const view = new DataView(buffer);
   const write = (off: number, str: string) => {
@@ -31,12 +31,20 @@ const generateBeepData = (): string => {
   view.setUint32(40, numSamples, true);
   for (let i = 0; i < numSamples; i++) {
     const sample = Math.sin(2 * Math.PI * frequency * i / sampleRate);
-    view.setUint8(44 + i, Math.floor((sample * 0.4 + 0.5) * 255));
+    view.setUint8(44 + i, Math.floor((sample * 0.5 + 0.5) * 255));
   }
   const bytes = new Uint8Array(buffer);
-  let binary = '';
-  for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
-  return 'data:audio/wav;base64,' + btoa(binary);
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+  let base64 = '';
+  for (let i = 0; i < bytes.length; i += 3) {
+    const b1 = bytes[i], b2 = i + 1 < bytes.length ? bytes[i + 1] : 0, b3 = i + 2 < bytes.length ? bytes[i + 2] : 0;
+    const triple = (b1 << 16) | (b2 << 8) | b3;
+    base64 += chars[(triple >> 18) & 63];
+    base64 += chars[(triple >> 12) & 63];
+    base64 += i + 1 < bytes.length ? chars[(triple >> 6) & 63] : '=';
+    base64 += i + 2 < bytes.length ? chars[triple & 63] : '=';
+  }
+  return 'data:audio/wav;base64,' + base64;
 };
 
 const BEEP_DATA = generateBeepData();

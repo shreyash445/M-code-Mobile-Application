@@ -1,4 +1,5 @@
-import { Tabs } from 'expo-router';
+import { Tabs, router } from 'expo-router';
+import { TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { THEME } from '../../constants/MorseData';
 
@@ -38,6 +39,15 @@ export default function TabLayout() {
         tabBarIconStyle: {
           marginTop: 4,
         },
+        headerRight: () => (
+          <TouchableOpacity
+            onPress={() => router.push('/settings')}
+            activeOpacity={0.6}
+            style={{ marginRight: 16 }}
+          >
+            <MaterialCommunityIcons name="cog-outline" size={22} color={THEME.ink} />
+          </TouchableOpacity>
+        ),
       }}>
       <Tabs.Screen
         name="index"
