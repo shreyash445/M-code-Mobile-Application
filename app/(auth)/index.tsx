@@ -4,24 +4,29 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { MORSE_CODE } from '../../constants/MorseData';
 import { useTheme } from '../../contexts/ThemeContext';
+import LavaLamp from '../../Animation/lava-lamp';
 
 const WORD = 'MORSE';
+const N = WORD.length;
+const DELTA = 0.08;
 
 export default function OnboardingScreen() {
   const { theme } = useTheme();
-  const progress = useRef(new Animated.Value(0)).current;
+  const phase = useRef(new Animated.Value(0)).current;
   const floatAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     const loop = Animated.loop(
       Animated.sequence([
-        Animated.timing(progress, { toValue: 1, duration: 1200, useNativeDriver: false }),
-        Animated.timing(progress, { toValue: 0, duration: 1200, useNativeDriver: false }),
+        Animated.timing(phase, { toValue: 2, duration: 2000, useNativeDriver: false }),
+        Animated.delay(400),
+        Animated.timing(phase, { toValue: 0, duration: 0, useNativeDriver: false }),
+        Animated.delay(400),
       ])
     );
     loop.start();
     return () => loop.stop();
-  }, [progress]);
+  }, [phase]);
 
   useEffect(() => {
     Animated.loop(
@@ -32,30 +37,31 @@ export default function OnboardingScreen() {
     ).start();
   }, [floatAnim]);
 
-  const slotProgress = (index: number) => {
-    const slotStart = index / WORD.length;
-    const slotEnd = (index + 1) / WORD.length;
-    return progress.interpolate({
-      inputRange: [0, slotStart, slotEnd, 1],
+  const slotMorseAlpha = (i: number) => {
+    const fwdThreshold = i / N;
+    const revThreshold = (N - 1 - i) / N;
+
+    const fwdValue = phase.interpolate({
+      inputRange: [0, fwdThreshold - DELTA, fwdThreshold + DELTA, 2],
       outputRange: [0, 0, 1, 1],
       extrapolate: 'clamp',
     });
-  };
 
-  const reverseSlotProgress = (index: number) => {
-    const slotStart = index / WORD.length;
-    const slotEnd = (index + 1) / WORD.length;
-    return progress.interpolate({
-      inputRange: [0, 1 - slotEnd, 1 - slotStart, 1],
+    const revValue = phase.interpolate({
+      inputRange: [0, 1 + revThreshold - DELTA, 1 + revThreshold + DELTA, 2],
       outputRange: [1, 1, 0, 0],
       extrapolate: 'clamp',
     });
+
+    return Animated.multiply(fwdValue, revValue);
   };
 
   const styles = useMemo(() => StyleSheet.create({
+    root: {
+      flex: 1,
+    },
     container: {
       flex: 1,
-      backgroundColor: theme.canvas,
       paddingHorizontal: 28,
       justifyContent: 'space-between',
     },
@@ -206,7 +212,9 @@ export default function OnboardingScreen() {
   }), [theme]);
 
   return (
-    <View style={styles.container}>
+    <View style={styles.root}>
+      <LavaLamp primaryColor={theme.primary} primaryGlow={theme.primaryGlow} canvasWarm={theme.canvasWarm} />
+      <View style={styles.container}>
       <View style={styles.topSection}>
         <Animated.View style={[styles.badgeContainer, { transform: [{ translateY: floatAnim }] }]}>
           <View style={styles.badge}>
@@ -219,14 +227,14 @@ export default function OnboardingScreen() {
 
         <View style={styles.morseAnimRow}>
           {WORD.split('').map((char, i) => {
-            const sp = slotProgress(i);
-            const rsp = reverseSlotProgress(i);
+            const morseAlpha = slotMorseAlpha(i);
+            const letterAlpha = Animated.subtract(1, morseAlpha);
             return (
               <View key={i} style={styles.morseSlot}>
                 <Animated.Text
                   style={[
                     styles.morseAnimChar,
-                    { opacity: Animated.subtract(1, Animated.multiply(sp, rsp)) },
+                    { opacity: letterAlpha },
                   ]}
                 >
                   {char}
@@ -234,7 +242,7 @@ export default function OnboardingScreen() {
                 <Animated.Text
                   style={[
                     styles.morseAnimCode,
-                    { opacity: Animated.multiply(sp, rsp) },
+                    { opacity: morseAlpha },
                   ]}
                 >
                   {MORSE_CODE[char]}
@@ -298,6 +306,7 @@ export default function OnboardingScreen() {
         >
           <Text style={styles.skipText}>Continue as Guest</Text>
         </TouchableOpacity>
+      </View>
       </View>
     </View>
   );

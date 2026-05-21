@@ -19,9 +19,9 @@ interface MorseTreeProps {
 export default function MorseTree({ currentPath }: MorseTreeProps) {
   const { theme } = useTheme();
   const svgWidth = width - 40;
-  const svgHeight = 200;
-  const nodeRadius = 10;
-  const verticalSpacing = 36;
+  const svgHeight = 280;
+  const nodeRadius = 14;
+  const verticalSpacing = 50;
 
   const renderNode = (node: MorseNode, x: number, y: number, level: number, path: string) => {
     const isActive = currentPath === path;
@@ -80,7 +80,7 @@ export default function MorseTree({ currentPath }: MorseTreeProps) {
           <Circle
             cx={x}
             cy={y}
-            r={nodeRadius + 7}
+            r={nodeRadius + 9}
             fill="none"
             stroke={theme.primary}
             strokeWidth={1.5}
@@ -98,7 +98,7 @@ export default function MorseTree({ currentPath }: MorseTreeProps) {
         <SvgText
           x={x}
           y={y + 5}
-          fontSize="13"
+          fontSize="15"
           fontWeight="800"
           textAnchor="middle"
           fill={isActive ? theme.canvas : (isPath ? theme.primary : theme.mute)}
@@ -120,7 +120,7 @@ export default function MorseTree({ currentPath }: MorseTreeProps) {
       borderRadius: 16,
       borderWidth: 1,
       borderColor: theme.canvasWarm,
-      padding: 8,
+      padding: 12,
     },
   }), [theme]);
 

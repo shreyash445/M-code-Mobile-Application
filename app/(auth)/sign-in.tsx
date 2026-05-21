@@ -244,7 +244,7 @@ export default function SignInScreen() {
 
             <View style={styles.socialRow}>
               {socials.map(s => (
-                <TouchableOpacity key={s.provider} style={styles.socialBtn} activeOpacity={0.7}>
+                <TouchableOpacity key={s.provider} style={styles.socialBtn} onPress={() => router.replace('/(tabs)')} activeOpacity={0.7}>
                   <MaterialCommunityIcons name={s.icon} size={22} color={s.color} />
                 </TouchableOpacity>
               ))}
