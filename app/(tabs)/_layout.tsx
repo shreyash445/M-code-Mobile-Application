@@ -1,17 +1,19 @@
 import { Tabs, router } from 'expo-router';
 import { TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { THEME } from '../../constants/MorseData';
+import { useTheme } from '../../contexts/ThemeContext';
 
 export default function TabLayout() {
+  const { theme } = useTheme();
+
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: THEME.primary,
-        tabBarInactiveTintColor: THEME.mute,
+        tabBarActiveTintColor: theme.primary,
+        tabBarInactiveTintColor: theme.mute,
         tabBarStyle: {
-          backgroundColor: THEME.canvasSoft,
-          borderTopColor: THEME.canvasWarm,
+          backgroundColor: theme.canvasSoft,
+          borderTopColor: theme.canvasWarm,
           borderTopWidth: 1,
           height: 72,
           paddingBottom: 12,
@@ -24,13 +26,13 @@ export default function TabLayout() {
           marginTop: 4,
         },
         headerStyle: {
-          backgroundColor: THEME.canvas,
-          borderBottomColor: THEME.canvasWarm,
+          backgroundColor: theme.canvas,
+          borderBottomColor: theme.canvasWarm,
           borderBottomWidth: 1,
           elevation: 0,
           shadowOpacity: 0,
         },
-        headerTintColor: THEME.ink,
+        headerTintColor: theme.ink,
         headerTitleStyle: {
           fontWeight: '700',
           fontSize: 18,
@@ -45,7 +47,7 @@ export default function TabLayout() {
             activeOpacity={0.6}
             style={{ marginRight: 16 }}
           >
-            <MaterialCommunityIcons name="cog-outline" size={22} color={THEME.ink} />
+            <MaterialCommunityIcons name="cog-outline" size={22} color={theme.ink} />
           </TouchableOpacity>
         ),
       }}>

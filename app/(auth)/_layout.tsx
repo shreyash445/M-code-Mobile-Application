@@ -1,15 +1,17 @@
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { THEME } from '../../constants/MorseData';
+import { useTheme } from '../../contexts/ThemeContext';
 
 export default function AuthLayout() {
+  const { theme } = useTheme();
+
   return (
     <>
       <StatusBar style="light" />
       <Stack
         screenOptions={{
           headerShown: false,
-          contentStyle: { backgroundColor: THEME.canvas },
+          contentStyle: { backgroundColor: theme.canvas },
           animation: 'slide_from_right',
         }}
       >

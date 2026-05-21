@@ -1,7 +1,8 @@
-import { type JSX } from 'react';
+import { type JSX, useMemo } from 'react';
 import { View, StyleSheet, Dimensions } from 'react-native';
 import Svg, { Circle, Line, Text as SvgText, G } from 'react-native-svg';
-import { THEME, LETTERS_TREE_DATA } from '../constants/MorseData';
+import { LETTERS_TREE_DATA } from '../constants/MorseData';
+import { useTheme } from '../contexts/ThemeContext';
 
 const { width } = Dimensions.get('window');
 
@@ -16,10 +17,11 @@ interface MorseTreeProps {
 }
 
 export default function MorseTree({ currentPath }: MorseTreeProps) {
+  const { theme } = useTheme();
   const svgWidth = width - 40;
-  const svgHeight = 90;
-  const nodeRadius = 6;
-  const verticalSpacing = 18;
+  const svgHeight = 200;
+  const nodeRadius = 10;
+  const verticalSpacing = 36;
 
   const renderNode = (node: MorseNode, x: number, y: number, level: number, path: string) => {
     const isActive = currentPath === path;
@@ -42,7 +44,7 @@ export default function MorseTree({ currentPath }: MorseTreeProps) {
             y1={y + nodeRadius}
             x2={childX}
             y2={childY - nodeRadius}
-            stroke={isDotActive ? THEME.primary : THEME.canvasWarm}
+            stroke={isDotActive ? theme.primary : theme.canvasWarm}
             strokeWidth={isDotActive ? 2 : 1}
           />
           {renderNode(node.dot, childX, childY, level + 1, dotPath)}
@@ -63,7 +65,7 @@ export default function MorseTree({ currentPath }: MorseTreeProps) {
             y1={y + nodeRadius}
             x2={childX}
             y2={childY - nodeRadius}
-            stroke={isDashActive ? THEME.primary : THEME.canvasWarm}
+            stroke={isDashActive ? theme.primary : theme.canvasWarm}
             strokeWidth={isDashActive ? 2 : 1}
           />
           {renderNode(node.dash, childX, childY, level + 1, dashPath)}
@@ -80,7 +82,7 @@ export default function MorseTree({ currentPath }: MorseTreeProps) {
             cy={y}
             r={nodeRadius + 7}
             fill="none"
-            stroke={THEME.primary}
+            stroke={theme.primary}
             strokeWidth={1.5}
             opacity={0.4}
           />
@@ -89,23 +91,38 @@ export default function MorseTree({ currentPath }: MorseTreeProps) {
           cx={x}
           cy={y}
           r={nodeRadius}
-          fill={isActive ? THEME.primary : (isPath ? THEME.primaryPale : THEME.canvas)}
-          stroke={isActive || isPath ? THEME.primary : THEME.canvasWarm}
+          fill={isActive ? theme.primary : (isPath ? theme.primaryPale : theme.canvas)}
+          stroke={isActive || isPath ? theme.primary : theme.canvasWarm}
           strokeWidth={isActive ? 2 : 1}
         />
         <SvgText
           x={x}
-          y={y + 4}
-          fontSize="11"
+          y={y + 5}
+          fontSize="13"
           fontWeight="800"
           textAnchor="middle"
-          fill={isActive ? THEME.canvas : (isPath ? THEME.primary : THEME.mute)}
+          fill={isActive ? theme.canvas : (isPath ? theme.primary : theme.mute)}
         >
           {node.char || (isRoot ? '\u25C9' : '')}
         </SvgText>
       </G>
     );
   };
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: 2,
+    },
+    treeWrapper: {
+      backgroundColor: theme.canvas,
+      borderRadius: 16,
+      borderWidth: 1,
+      borderColor: theme.canvasWarm,
+      padding: 8,
+    },
+  }), [theme]);
 
   return (
     <View style={styles.container}>
@@ -117,18 +134,3 @@ export default function MorseTree({ currentPath }: MorseTreeProps) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 2,
-  },
-  treeWrapper: {
-    backgroundColor: THEME.canvas,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: THEME.canvasWarm,
-    padding: 8,
-  },
-});

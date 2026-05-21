@@ -1,74 +1,75 @@
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Platform } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Switch, Platform } from 'react-native';
 import { router } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
-import { THEME } from '../constants/MorseData';
+import { useTheme } from '../contexts/ThemeContext';
 
 export default function SettingsScreen() {
+  const { theme, isDark, toggleTheme } = useTheme();
+
   return (
-    <View style={styles.container}>
-      <StatusBar style="light" />
-      <View style={styles.header}>
+    <View style={[styles.container, { backgroundColor: theme.canvas }]}>
+      <StatusBar style={isDark ? 'light' : 'dark'} />
+      <View style={[styles.header, { backgroundColor: theme.canvas, borderBottomColor: theme.canvasWarm }]}>
         <TouchableOpacity onPress={() => router.back()} activeOpacity={0.6} style={styles.backBtn}>
-          <MaterialCommunityIcons name="arrow-left" size={24} color={THEME.ink} />
+          <MaterialCommunityIcons name="arrow-left" size={24} color={theme.ink} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Settings</Text>
+        <Text style={[styles.headerTitle, { color: theme.ink }]}>Settings</Text>
         <View style={styles.backBtn} />
       </View>
 
       <ScrollView contentContainerStyle={styles.scroll}>
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>Profile</Text>
-          <View style={styles.card}>
+          <Text style={[styles.sectionLabel, { color: theme.primary }]}>Profile</Text>
+          <View style={[styles.card, { backgroundColor: theme.canvasSoft, borderColor: theme.canvasWarm }]}>
             <View style={styles.profileRow}>
-              <View style={styles.avatar}>
-                <MaterialCommunityIcons name="account" size={28} color={THEME.primary} />
+              <View style={[styles.avatar, { backgroundColor: theme.canvas, borderColor: theme.canvasWarm }]}>
+                <MaterialCommunityIcons name="account" size={28} color={theme.primary} />
               </View>
               <View style={styles.profileInfo}>
-                <Text style={styles.profileName}>Guest User</Text>
-                <Text style={styles.profileEmail}>Sign in to sync progress</Text>
+                <Text style={[styles.profileName, { color: theme.ink }]}>Guest User</Text>
+                <Text style={[styles.profileEmail, { color: theme.mute }]}>Sign in to sync progress</Text>
               </View>
-              <MaterialCommunityIcons name="chevron-right" size={20} color={THEME.mute} />
+              <MaterialCommunityIcons name="chevron-right" size={20} color={theme.mute} />
             </View>
           </View>
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>Appearance</Text>
-          <View style={styles.card}>
-            <TouchableOpacity style={styles.themeRow} activeOpacity={0.7}>
+          <Text style={[styles.sectionLabel, { color: theme.primary }]}>Appearance</Text>
+          <View style={[styles.card, { backgroundColor: theme.canvasSoft, borderColor: theme.canvasWarm }]}>
+            <View style={styles.themeRow}>
               <View style={styles.themeLeft}>
-                <MaterialCommunityIcons name="weather-night" size={20} color={THEME.primary} />
-                <Text style={styles.themeLabel}>Dark Mode</Text>
+                <MaterialCommunityIcons name={isDark ? 'weather-night' : 'weather-sunny'} size={20} color={theme.primary} />
+                <Text style={[styles.themeLabel, { color: theme.ink }]}>{isDark ? 'Dark Mode' : 'Light Mode'}</Text>
               </View>
-              <View style={styles.radioOuter}>
-                <View style={[styles.radioInner, { backgroundColor: THEME.primary }]} />
-              </View>
-            </TouchableOpacity>
-            <View style={styles.themeDivider} />
-            <TouchableOpacity style={styles.themeRow} activeOpacity={0.7}>
-              <View style={styles.themeLeft}>
-                <MaterialCommunityIcons name="weather-sunny" size={20} color={THEME.mute} />
-                <Text style={[styles.themeLabel, { color: THEME.mute }]}>Light Mode</Text>
-              </View>
-              <View style={styles.radioOuter}>
-                <View style={styles.radioInnerEmpty} />
-              </View>
-            </TouchableOpacity>
+              <Switch
+                value={!isDark}
+                onValueChange={toggleTheme}
+                trackColor={{ false: theme.canvasWarm, true: theme.primary }}
+                thumbColor={isDark ? theme.mute : theme.canvas}
+              />
+            </View>
           </View>
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>About</Text>
-          <View style={styles.card}>
-            <View style={styles.aboutRow}>
-              <Text style={styles.aboutKey}>Version</Text>
-              <Text style={styles.aboutValue}>1.0.0</Text>
+          <Text style={[styles.sectionLabel, { color: theme.primary }]}>About</Text>
+          <View style={[styles.card, { backgroundColor: theme.canvasSoft, borderColor: theme.canvasWarm }]}>
+            <View style={styles.aboutSection}>
+              <MaterialCommunityIcons name="radio-tower" size={24} color={theme.primary} />
+              <Text style={[styles.aboutAppName, { color: theme.ink }]}>M-Code</Text>
+              <Text style={[styles.aboutTagline, { color: theme.body }]}>Master Morse Code</Text>
+              <Text style={[styles.aboutDesc, { color: theme.body }]}>
+                M-Code is a complete Morse code learning and communication app. Encode text into Morse signals, 
+                decode incoming Morse with the telegraph key, explore the full reference chart, and master 
+                the art of telegraphy — all from your mobile device.
+              </Text>
             </View>
-            <View style={styles.themeDivider} />
+            <View style={[styles.themeDivider, { backgroundColor: theme.canvasWarm }]} />
             <View style={styles.aboutRow}>
-              <Text style={styles.aboutKey}>Made with</Text>
-              <Text style={styles.aboutValue}>Expo + React Native</Text>
+              <Text style={[styles.aboutKey, { color: theme.body }]}>Version</Text>
+              <Text style={[styles.aboutValue, { color: theme.ink }]}>1.0.0</Text>
             </View>
           </View>
         </View>
@@ -80,7 +81,6 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: THEME.canvas,
   },
   header: {
     flexDirection: 'row',
@@ -89,9 +89,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: Platform.OS === 'ios' ? 56 : 16,
     paddingBottom: 12,
-    backgroundColor: THEME.canvas,
     borderBottomWidth: 1,
-    borderBottomColor: THEME.canvasWarm,
   },
   backBtn: {
     width: 40,
@@ -100,7 +98,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   headerTitle: {
-    color: THEME.ink,
     fontSize: 18,
     fontWeight: '700',
   },
@@ -112,7 +109,6 @@ const styles = StyleSheet.create({
     marginBottom: 28,
   },
   sectionLabel: {
-    color: THEME.primary,
     fontSize: 11,
     fontWeight: '700',
     letterSpacing: 1.5,
@@ -121,10 +117,8 @@ const styles = StyleSheet.create({
     marginLeft: 4,
   },
   card: {
-    backgroundColor: THEME.canvasSoft,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: THEME.canvasWarm,
     overflow: 'hidden',
   },
   profileRow: {
@@ -137,9 +131,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: THEME.canvas,
     borderWidth: 2,
-    borderColor: THEME.canvasWarm,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -147,13 +139,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   profileName: {
-    color: THEME.ink,
     fontSize: 16,
     fontWeight: '700',
     marginBottom: 2,
   },
   profileEmail: {
-    color: THEME.mute,
     fontSize: 12,
     fontWeight: '500',
   },
@@ -169,34 +159,35 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   themeLabel: {
-    color: THEME.ink,
     fontSize: 15,
     fontWeight: '600',
   },
-  radioOuter: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    borderWidth: 2,
-    borderColor: THEME.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  radioInner: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-  },
-  radioInnerEmpty: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    backgroundColor: 'transparent',
-  },
   themeDivider: {
     height: 1,
-    backgroundColor: THEME.canvasWarm,
     marginHorizontal: 16,
+  },
+  aboutSection: {
+    alignItems: 'center',
+    padding: 20,
+    gap: 8,
+  },
+  aboutAppName: {
+    fontSize: 22,
+    fontWeight: '800',
+    letterSpacing: -0.5,
+  },
+  aboutTagline: {
+    fontSize: 12,
+    fontWeight: '600',
+    letterSpacing: 2,
+    textTransform: 'uppercase',
+    marginBottom: 4,
+  },
+  aboutDesc: {
+    fontSize: 13,
+    lineHeight: 20,
+    textAlign: 'center',
+    fontWeight: '500',
   },
   aboutRow: {
     flexDirection: 'row',
@@ -205,12 +196,10 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   aboutKey: {
-    color: THEME.body,
     fontSize: 14,
     fontWeight: '500',
   },
   aboutValue: {
-    color: THEME.ink,
     fontSize: 14,
     fontWeight: '600',
   },

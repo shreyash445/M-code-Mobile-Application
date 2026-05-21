@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -10,13 +10,15 @@ import {
   Platform,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { MORSE_CODE, REVERSE_MORSE_CODE, THEME } from '../../constants/MorseData';
+import { MORSE_CODE, REVERSE_MORSE_CODE } from '../../constants/MorseData';
+import { useTheme } from '../../contexts/ThemeContext';
 import SignalLamp from '../../components/SignalLamp';
 import { useMorsePlayer } from '../../hooks/useMorsePlayer';
 
 type Mode = 'encode' | 'decode';
 
 export default function EncoderScreen() {
+  const { theme } = useTheme();
   const [mode, setMode] = useState<Mode>('encode');
   const [inputText, setInputText] = useState('');
   const [outputText, setOutputText] = useState('');
@@ -51,6 +53,226 @@ export default function EncoderScreen() {
 
   const morseForDisplay = mode === 'encode' ? outputText : inputText;
 
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.canvas,
+    },
+    scrollContent: {
+      padding: 20,
+      paddingBottom: 48,
+    },
+    hero: {
+      marginBottom: 24,
+    },
+    heroEyebrow: {
+      color: theme.primary,
+      fontSize: 11,
+      fontWeight: '700',
+      letterSpacing: 2.5,
+      textTransform: 'uppercase',
+      marginBottom: 6,
+    },
+    heroTitle: {
+      color: theme.ink,
+      fontSize: 36,
+      fontWeight: '700',
+      letterSpacing: -0.5,
+      lineHeight: 38,
+      fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
+    },
+    modeToggle: {
+      flexDirection: 'row',
+      backgroundColor: theme.canvasSoft,
+      borderRadius: 14,
+      padding: 3,
+      marginBottom: 20,
+      borderWidth: 1,
+      borderColor: theme.canvasWarm,
+    },
+    modeBtn: {
+      flex: 1,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 6,
+      paddingVertical: 11,
+      borderRadius: 11,
+    },
+    modeBtnActive: {
+      backgroundColor: theme.primary,
+    },
+    modeBtnText: {
+      color: theme.mute,
+      fontSize: 13,
+      fontWeight: '700',
+      letterSpacing: 0.3,
+    },
+    modeBtnTextActive: {
+      color: theme.canvas,
+    },
+    lampCard: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: theme.canvasSoft,
+      borderRadius: 16,
+      padding: 18,
+      marginBottom: 20,
+      borderWidth: 1,
+      borderColor: theme.canvasWarm,
+    },
+    statusBlock: {
+      marginLeft: 14,
+      flex: 1,
+    },
+    statusRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+    },
+    statusLabel: {
+      color: theme.ink,
+      fontSize: 16,
+      fontWeight: '700',
+    },
+    pulseDot: {
+      width: 8,
+      height: 8,
+      borderRadius: 4,
+      backgroundColor: theme.primary,
+    },
+    statusSub: {
+      color: theme.body,
+      fontSize: 12,
+      marginTop: 3,
+      fontWeight: '500',
+    },
+    inputCard: {
+      backgroundColor: theme.canvasSoft,
+      borderRadius: 16,
+      padding: 20,
+      marginBottom: 12,
+      borderWidth: 1,
+      borderColor: theme.canvasWarm,
+    },
+    inputLabel: {
+      color: theme.primary,
+      fontSize: 11,
+      fontWeight: '700',
+      letterSpacing: 1.5,
+      marginBottom: 10,
+      textTransform: 'uppercase',
+    },
+    textInput: {
+      backgroundColor: theme.canvas,
+      color: theme.ink,
+      padding: 16,
+      borderRadius: 12,
+      fontSize: 15,
+      minHeight: 88,
+      textAlignVertical: 'top',
+      borderWidth: 1,
+      borderColor: theme.canvasWarm,
+    },
+    morseInput: {
+      fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
+      fontSize: 17,
+      letterSpacing: 4,
+    },
+    outputCard: {
+      backgroundColor: theme.canvasSoft,
+      borderRadius: 16,
+      padding: 16,
+      marginBottom: 12,
+      borderWidth: 1,
+      borderColor: theme.canvasWarm,
+    },
+    outputHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: 10,
+    },
+    liveBadge: {
+      backgroundColor: theme.negative,
+      paddingHorizontal: 8,
+      paddingVertical: 2,
+      borderRadius: 4,
+    },
+    liveBadgeText: {
+      color: theme.canvas,
+      fontSize: 9,
+      fontWeight: '800',
+      letterSpacing: 1,
+    },
+    outputScroll: {
+      minHeight: 80,
+    },
+    outputScrollContent: {
+      alignItems: 'center',
+      paddingVertical: 4,
+    },
+    outputRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    outputCharWrap: {
+      marginHorizontal: 1,
+    },
+    outputCharBg: {
+      paddingHorizontal: 4,
+      paddingVertical: 6,
+      borderRadius: 6,
+    },
+    activeOutputCharBg: {
+      backgroundColor: theme.primaryGlow,
+    },
+    placeholderText: {
+      color: theme.mute,
+      fontSize: 15,
+      fontWeight: '500',
+    },
+    outputChar: {
+      color: theme.body,
+      fontSize: 20,
+      fontWeight: '600',
+      letterSpacing: 1,
+    },
+    morseOutputChar: {
+      fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
+      color: theme.primary,
+    },
+    activeOutputChar: {
+      color: theme.primary,
+      fontWeight: '800',
+      fontSize: 24,
+    },
+    dimmedChar: {
+      opacity: 0.3,
+    },
+    playButton: {
+      backgroundColor: theme.primary,
+      borderRadius: 14,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: 16,
+      gap: 10,
+    },
+    stopButton: {
+      backgroundColor: theme.negative,
+    },
+    playButtonText: {
+      color: theme.canvas,
+      fontSize: 15,
+      fontWeight: '700',
+      letterSpacing: 0.5,
+    },
+    playButtonTextStop: {
+      color: theme.canvas,
+    },
+  }), [theme]);
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -73,7 +295,7 @@ export default function EncoderScreen() {
             <MaterialCommunityIcons
               name="alpha-t-box-outline"
               size={16}
-              color={mode === 'encode' ? THEME.canvas : THEME.mute}
+              color={mode === 'encode' ? theme.canvas : theme.mute}
             />
             <Text style={[styles.modeBtnText, mode === 'encode' && styles.modeBtnTextActive]}>
               Encode
@@ -87,7 +309,7 @@ export default function EncoderScreen() {
             <MaterialCommunityIcons
               name="code-braces"
               size={16}
-              color={mode === 'decode' ? THEME.canvas : THEME.mute}
+              color={mode === 'decode' ? theme.canvas : theme.mute}
             />
             <Text style={[styles.modeBtnText, mode === 'decode' && styles.modeBtnTextActive]}>
               Decode
@@ -119,52 +341,47 @@ export default function EncoderScreen() {
             value={inputText}
             onChangeText={setInputText}
             placeholder={mode === 'encode' ? 'Enter your message...' : '.- -... -.-. -..'}
-            placeholderTextColor={THEME.mute}
+            placeholderTextColor={theme.mute}
             multiline
           />
         </View>
 
         <View style={styles.outputCard}>
-          <Text style={styles.inputLabel}>
-            {mode === 'encode' ? 'Morse Output' : 'Text Output'}
-          </Text>
-          <View style={styles.outputBox}>
-            <Text
-              style={[
-                styles.outputText,
-                mode === 'encode' && styles.morseOutput,
-                !outputText && styles.placeholderText,
-              ]}
-            >
-              {outputText || (mode === 'encode' ? 'Morse signal appears here' : 'Decoded message appears here')}
+          <View style={styles.outputHeader}>
+            <Text style={styles.inputLabel}>
+              {mode === 'encode' ? 'Morse Output' : 'Text Output'}
             </Text>
+            {isPlaying && <View style={styles.liveBadge}><Text style={styles.liveBadgeText}>LIVE</Text></View>}
           </View>
-        </View>
-
-        <View style={styles.visualizerCard}>
-          <View style={styles.visualizerLabel}>
-            <MaterialCommunityIcons name="waveform" size={14} color={THEME.mute} />
-            <Text style={styles.visualizerLabelText}>Signal View</Text>
-          </View>
-          <ScrollView horizontal contentContainerStyle={styles.morseDisplay} showsHorizontalScrollIndicator={false}>
-            {morseForDisplay === '' ? (
-              <Text style={styles.visualizerPlaceholder}>—</Text>
+          <ScrollView
+            horizontal
+            style={styles.outputScroll}
+            contentContainerStyle={styles.outputScrollContent}
+            showsHorizontalScrollIndicator={false}
+          >
+            {!outputText ? (
+              <Text style={styles.placeholderText}>
+                {mode === 'encode' ? 'Morse signal appears here' : 'Decoded message appears here'}
+              </Text>
             ) : (
-              morseForDisplay.split('').map((char, i) => (
-                <View key={i} style={styles.morseCharWrap}>
-                  <View style={[styles.morseCharBg, currentIndex === i && styles.activeMorseCharBg]}>
-                    <Text
-                      style={[
-                        styles.morseChar,
-                        currentIndex === i && styles.activeMorseChar,
-                        currentIndex !== -1 && currentIndex !== i && styles.dimmedChar,
-                      ]}
-                    >
-                      {char === ' ' ? '\u00B7' : char}
-                    </Text>
+              <View style={styles.outputRow}>
+                {(mode === 'encode' ? outputText : outputText).split('').map((char, i) => (
+                  <View key={i} style={styles.outputCharWrap}>
+                    <View style={[styles.outputCharBg, currentIndex === i && styles.activeOutputCharBg]}>
+                      <Text
+                        style={[
+                          styles.outputChar,
+                          mode === 'encode' && styles.morseOutputChar,
+                          currentIndex === i && styles.activeOutputChar,
+                          currentIndex !== -1 && currentIndex !== i && styles.dimmedChar,
+                        ]}
+                      >
+                        {char === ' ' ? '\u00B7' : char}
+                      </Text>
+                    </View>
                   </View>
-                </View>
-              ))
+                ))}
+              </View>
             )}
           </ScrollView>
         </View>
@@ -177,7 +394,7 @@ export default function EncoderScreen() {
           <MaterialCommunityIcons
             name={isPlaying ? 'stop-circle' : 'play-circle'}
             size={20}
-            color={isPlaying ? THEME.canvas : THEME.canvas}
+            color={isPlaying ? theme.canvas : theme.canvas}
           />
           <Text style={[styles.playButtonText, isPlaying && styles.playButtonTextStop]}>
             {isPlaying ? 'Stop' : 'Transmit'}
@@ -187,239 +404,3 @@ export default function EncoderScreen() {
     </KeyboardAvoidingView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: THEME.canvas,
-  },
-  scrollContent: {
-    padding: 20,
-    paddingBottom: 48,
-  },
-  hero: {
-    marginBottom: 24,
-  },
-  heroEyebrow: {
-    color: THEME.primary,
-    fontSize: 11,
-    fontWeight: '700',
-    letterSpacing: 2.5,
-    textTransform: 'uppercase',
-    marginBottom: 6,
-  },
-  heroTitle: {
-    color: THEME.ink,
-    fontSize: 36,
-    fontWeight: '700',
-    letterSpacing: -0.5,
-    lineHeight: 38,
-    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
-  },
-  modeToggle: {
-    flexDirection: 'row',
-    backgroundColor: THEME.canvasSoft,
-    borderRadius: 14,
-    padding: 3,
-    marginBottom: 20,
-    borderWidth: 1,
-    borderColor: THEME.canvasWarm,
-  },
-  modeBtn: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    paddingVertical: 11,
-    borderRadius: 11,
-  },
-  modeBtnActive: {
-    backgroundColor: THEME.primary,
-  },
-  modeBtnText: {
-    color: THEME.mute,
-    fontSize: 13,
-    fontWeight: '700',
-    letterSpacing: 0.3,
-  },
-  modeBtnTextActive: {
-    color: THEME.canvas,
-  },
-  lampCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: THEME.canvasSoft,
-    borderRadius: 16,
-    padding: 18,
-    marginBottom: 20,
-    borderWidth: 1,
-    borderColor: THEME.canvasWarm,
-  },
-  statusBlock: {
-    marginLeft: 14,
-    flex: 1,
-  },
-  statusRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  statusLabel: {
-    color: THEME.ink,
-    fontSize: 16,
-    fontWeight: '700',
-  },
-  pulseDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: THEME.primary,
-  },
-  statusSub: {
-    color: THEME.body,
-    fontSize: 12,
-    marginTop: 3,
-    fontWeight: '500',
-  },
-  inputCard: {
-    backgroundColor: THEME.canvasSoft,
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: THEME.canvasWarm,
-  },
-  inputLabel: {
-    color: THEME.primary,
-    fontSize: 11,
-    fontWeight: '700',
-    letterSpacing: 1.5,
-    marginBottom: 10,
-    textTransform: 'uppercase',
-  },
-  textInput: {
-    backgroundColor: THEME.canvas,
-    color: THEME.ink,
-    padding: 16,
-    borderRadius: 12,
-    fontSize: 15,
-    minHeight: 88,
-    textAlignVertical: 'top',
-    borderWidth: 1,
-    borderColor: THEME.canvasWarm,
-  },
-  morseInput: {
-    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
-    fontSize: 17,
-    letterSpacing: 4,
-  },
-  outputCard: {
-    backgroundColor: THEME.canvasSoft,
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: THEME.canvasWarm,
-  },
-  outputBox: {
-    minHeight: 88,
-    justifyContent: 'center',
-    backgroundColor: THEME.canvas,
-    borderRadius: 12,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: THEME.canvasWarm,
-  },
-  outputText: {
-    fontSize: 15,
-    lineHeight: 24,
-    color: THEME.ink,
-  },
-  morseOutput: {
-    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
-    fontSize: 17,
-    letterSpacing: 4,
-    color: THEME.primary,
-  },
-  placeholderText: {
-    color: THEME.mute,
-  },
-  visualizerCard: {
-    backgroundColor: THEME.canvasSoft,
-    borderRadius: 16,
-    marginBottom: 20,
-    borderWidth: 1,
-    borderColor: THEME.canvasWarm,
-    padding: 14,
-  },
-  visualizerLabel: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    marginBottom: 10,
-  },
-  visualizerLabelText: {
-    color: THEME.mute,
-    fontSize: 10,
-    fontWeight: '700',
-    letterSpacing: 1.2,
-    textTransform: 'uppercase',
-  },
-  morseDisplay: {
-    alignItems: 'center',
-    paddingVertical: 4,
-  },
-  morseCharWrap: {
-    marginHorizontal: 1,
-  },
-  morseCharBg: {
-    paddingHorizontal: 4,
-    paddingVertical: 6,
-    borderRadius: 6,
-  },
-  activeMorseCharBg: {
-    backgroundColor: THEME.primaryGlow,
-  },
-  visualizerPlaceholder: {
-    color: THEME.mute,
-    fontSize: 18,
-    fontWeight: '700',
-    letterSpacing: 4,
-  },
-  morseChar: {
-    color: THEME.body,
-    fontSize: 20,
-    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
-    letterSpacing: 1,
-  },
-  activeMorseChar: {
-    color: THEME.primary,
-    fontWeight: '700',
-    fontSize: 24,
-  },
-  dimmedChar: {
-    opacity: 0.3,
-  },
-  playButton: {
-    backgroundColor: THEME.primary,
-    borderRadius: 14,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 16,
-    gap: 10,
-  },
-  stopButton: {
-    backgroundColor: THEME.negative,
-  },
-  playButtonText: {
-    color: THEME.canvas,
-    fontSize: 15,
-    fontWeight: '700',
-    letterSpacing: 0.5,
-  },
-  playButtonTextStop: {
-    color: THEME.canvas,
-  },
-});
