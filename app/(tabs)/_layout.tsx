@@ -42,7 +42,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Encode',
+          title: 'Translator',
           tabBarIcon: ({ color }) => (
             <MaterialCommunityIcons name="swap-horizontal" size={22} color={color} />
           ),

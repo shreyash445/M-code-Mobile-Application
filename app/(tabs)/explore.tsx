@@ -11,6 +11,10 @@ export default function ReferenceScreen() {
 
   return (
     <View style={styles.container}>
+      <View style={styles.hero}>
+        <Text style={styles.heroEyebrow}>Morse Code</Text>
+        <Text style={styles.heroTitle}>Reference</Text>
+      </View>
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {sections.map((section) => (
           <View key={section.title} style={styles.section}>
@@ -47,6 +51,27 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: THEME.canvas,
+  },
+  hero: {
+    marginBottom: 20,
+    paddingHorizontal: 20,
+    paddingTop: 16,
+  },
+  heroEyebrow: {
+    color: THEME.primary,
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 2.5,
+    textTransform: 'uppercase',
+    marginBottom: 6,
+  },
+  heroTitle: {
+    color: THEME.ink,
+    fontSize: 36,
+    fontWeight: '700',
+    letterSpacing: -0.5,
+    lineHeight: 38,
+    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
   },
   scrollContent: {
     padding: 20,

@@ -162,39 +162,32 @@ export default function TelegraphScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <View style={styles.headerLeft}>
-          <SignalLamp active={isPressing} size={36} />
-          <View style={styles.headerInfo}>
-            <Text style={styles.headerEyebrow}>Telegraph Key</Text>
-            <Text style={styles.headerStatus}>
-              {isPressing ? 'Transmitting' : 'Ready'}
-            </Text>
-          </View>
-        </View>
-        <TouchableOpacity style={styles.clearHeaderBtn} onPress={handleClear} activeOpacity={0.6}>
-          <MaterialCommunityIcons name="delete-sweep" size={18} color={THEME.negative} />
-        </TouchableOpacity>
+      <View style={styles.hero}>
+        <Text style={styles.heroEyebrow}>Telegraph Key</Text>
+        <Text style={styles.heroTitle}>Tap the Key</Text>
+      </View>
+
+      <View style={styles.lampRow}>
+        <SignalLamp active={isPressing} size={28} />
+        <Text style={styles.lampStatus}>
+          {isPressing ? 'Transmitting' : 'Ready'}
+        </Text>
       </View>
 
       <View style={styles.messageCard}>
         <View style={styles.messageHeader}>
-          <MaterialCommunityIcons name="message-text-outline" size={14} color={THEME.mute} />
+          <MaterialCommunityIcons name="message-text-outline" size={12} color={THEME.mute} />
           <Text style={styles.messageLabel}>Output</Text>
         </View>
+        <Text style={styles.decodedText} numberOfLines={1}>
+          {decodedMessage || 'Tap the key to begin...'}
+        </Text>
         <Text style={styles.morseHistory} numberOfLines={1}>
           {currentMorse || '\u2014'}
-        </Text>
-        <Text style={styles.decodedText} numberOfLines={2}>
-          {decodedMessage || 'Tap the key to begin...'}
         </Text>
       </View>
 
       <View style={styles.treeSection}>
-        <View style={styles.treeLabel}>
-          <MaterialCommunityIcons name="graph" size={12} color={THEME.mute} />
-          <Text style={styles.treeLabelText}>Navigation Tree</Text>
-        </View>
         <MorseTree currentPath={currentPath} />
       </View>
 
@@ -224,7 +217,7 @@ export default function TelegraphScreen() {
               shadowOpacity: keyGlow,
               shadowRadius: keyGlow.interpolate({
                 inputRange: [0, 1],
-                outputRange: [0, 24],
+                outputRange: [0, 18],
               }),
             },
           ]}
@@ -247,7 +240,7 @@ export default function TelegraphScreen() {
               <View style={styles.keyInner}>
                 <MaterialCommunityIcons
                   name="lightning-bolt"
-                  size={32}
+                  size={26}
                   color={isPressing ? THEME.canvas : THEME.primary}
                 />
               </View>
@@ -255,30 +248,30 @@ export default function TelegraphScreen() {
           </Animated.View>
         </Animated.View>
 
-        <View style={styles.instructionRow}>
-          <View style={styles.instructionItem}>
-            <View style={[styles.instrDot, { width: 8, height: 8, borderRadius: 4 }]} />
-            <Text style={styles.instructionText}>Short tap</Text>
-          </View>
-          <View style={styles.instructionItem}>
-            <View style={[styles.instrDash]} />
-            <Text style={styles.instructionText}>Long press</Text>
-          </View>
-        </View>
-
-        <View style={styles.controlButtons}>
+        <View style={styles.controlRow}>
           <TouchableOpacity style={styles.ctrlBtn} onPress={handleDelete} activeOpacity={0.6}>
-            <MaterialCommunityIcons name="backspace-outline" size={16} color={THEME.body} />
+            <MaterialCommunityIcons name="backspace-outline" size={15} color={THEME.body} />
             <Text style={styles.ctrlBtnText}>Delete</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.ctrlBtn} onPress={handleSpace} activeOpacity={0.6}>
-            <MaterialCommunityIcons name="arrow-right-bold" size={16} color={THEME.body} />
+            <MaterialCommunityIcons name="arrow-right-bold" size={15} color={THEME.body} />
             <Text style={styles.ctrlBtnText}>Space</Text>
           </TouchableOpacity>
           <TouchableOpacity style={[styles.ctrlBtn, styles.clearBtn]} onPress={handleClear} activeOpacity={0.6}>
-            <MaterialCommunityIcons name="trash-can-outline" size={16} color={THEME.negative} />
+            <MaterialCommunityIcons name="trash-can-outline" size={15} color={THEME.negative} />
             <Text style={[styles.ctrlBtnText, { color: THEME.negative }]}>Clear</Text>
           </TouchableOpacity>
+        </View>
+
+        <View style={styles.instructionRow}>
+          <View style={styles.instructionItem}>
+            <View style={[styles.instrDot, { width: 6, height: 6, borderRadius: 3 }]} />
+            <Text style={styles.instructionText}>Tap</Text>
+          </View>
+          <View style={styles.instructionItem}>
+            <View style={[styles.instrDash]} />
+            <Text style={styles.instructionText}>Hold</Text>
+          </View>
         </View>
       </View>
     </View>
@@ -290,46 +283,45 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: THEME.canvas,
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+  hero: {
     paddingHorizontal: 20,
-    paddingVertical: 14,
-    backgroundColor: THEME.canvas,
-    borderBottomWidth: 1,
-    borderBottomColor: THEME.canvasWarm,
+    paddingTop: 12,
+    marginBottom: 8,
   },
-  headerLeft: {
+  heroEyebrow: {
+    color: THEME.primary,
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 2.5,
+    textTransform: 'uppercase',
+    marginBottom: 4,
+  },
+  heroTitle: {
+    color: THEME.ink,
+    fontSize: 30,
+    fontWeight: '700',
+    letterSpacing: -0.5,
+    lineHeight: 32,
+    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
+  },
+  lampRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 10,
+    paddingHorizontal: 20,
+    marginBottom: 10,
   },
-  headerInfo: {
-    marginLeft: 10,
-  },
-  headerEyebrow: {
-    color: THEME.primary,
-    fontSize: 10,
-    fontWeight: '700',
-    letterSpacing: 2,
-    textTransform: 'uppercase',
-  },
-  headerStatus: {
+  lampStatus: {
     color: THEME.body,
     fontSize: 12,
-    marginTop: 2,
-    fontWeight: '500',
-  },
-  clearHeaderBtn: {
-    padding: 8,
-    opacity: 0.7,
+    fontWeight: '600',
   },
   messageCard: {
     backgroundColor: THEME.canvasSoft,
-    borderRadius: 16,
-    padding: 18,
+    borderRadius: 14,
+    padding: 12,
     marginHorizontal: 20,
-    marginTop: 16,
+    marginBottom: 8,
     borderWidth: 1,
     borderColor: THEME.canvasWarm,
   },
@@ -337,52 +329,39 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    marginBottom: 10,
+    marginBottom: 6,
   },
   messageLabel: {
     color: THEME.mute,
-    fontSize: 10,
+    fontSize: 9,
     fontWeight: '700',
     letterSpacing: 1.2,
     textTransform: 'uppercase',
+  },
+  decodedText: {
+    color: THEME.ink,
+    fontSize: 18,
+    fontWeight: '700',
+    lineHeight: 24,
+    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
+    marginBottom: 4,
   },
   morseHistory: {
     color: THEME.primary,
     fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
-    fontSize: 15,
-    letterSpacing: 5,
-    marginBottom: 6,
-  },
-  decodedText: {
-    color: THEME.ink,
-    fontSize: 22,
-    fontWeight: '700',
-    lineHeight: 30,
-    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
+    fontSize: 13,
+    letterSpacing: 4,
   },
   treeSection: {
-    height: 150,
+    height: 110,
     justifyContent: 'center',
     paddingHorizontal: 20,
-    paddingVertical: 8,
-  },
-  treeLabel: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
     marginBottom: 4,
-    paddingLeft: 4,
-  },
-  treeLabelText: {
-    color: THEME.mute,
-    fontSize: 10,
-    fontWeight: '700',
-    letterSpacing: 1.2,
-    textTransform: 'uppercase',
   },
   footer: {
-    padding: 20,
-    paddingTop: 16,
+    paddingHorizontal: 20,
+    paddingTop: 10,
+    paddingBottom: 8,
     alignItems: 'center',
     backgroundColor: THEME.canvasSoft,
     borderTopLeftRadius: 20,
@@ -396,42 +375,44 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     width: '100%',
-    marginBottom: 18,
+    marginBottom: 8,
   },
   pathDisplay: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 4,
+    flex: 1,
   },
   pathSymbolWrap: {
     backgroundColor: THEME.canvas,
-    paddingHorizontal: 6,
-    paddingVertical: 3,
-    borderRadius: 6,
+    paddingHorizontal: 4,
+    paddingVertical: 2,
+    borderRadius: 5,
     borderWidth: 1,
     borderColor: THEME.canvasWarm,
   },
   pathSymbol: {
     color: THEME.primary,
-    fontSize: 16,
+    fontSize: 13,
     fontWeight: '700',
   },
   pathPlaceholder: {
     color: THEME.mute,
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '600',
   },
   guessBadge: {
     backgroundColor: THEME.primaryPale,
-    paddingHorizontal: 14,
-    paddingVertical: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
     borderRadius: 9999,
     borderWidth: 1,
     borderColor: THEME.primary,
+    marginLeft: 8,
   },
   guessText: {
     color: THEME.primary,
-    fontSize: 18,
+    fontSize: 15,
     fontWeight: '800',
     fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
   },
@@ -442,11 +423,11 @@ const styles = StyleSheet.create({
   },
   keyOuterRing: {
     borderRadius: 9999,
-    padding: 4,
+    padding: 3,
   },
   keyButton: {
-    width: 88,
-    height: 88,
+    width: 72,
+    height: 72,
     borderRadius: 9999,
     backgroundColor: THEME.canvas,
     justifyContent: 'center',
@@ -455,61 +436,35 @@ const styles = StyleSheet.create({
     borderColor: THEME.primary,
     shadowColor: THEME.primary,
     shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 8,
+    shadowRadius: 6,
     elevation: 4,
   },
   keyButtonPressed: {
     backgroundColor: THEME.primary,
     borderColor: THEME.primaryActive,
     shadowOpacity: 0.5,
-    shadowRadius: 16,
-    elevation: 8,
+    shadowRadius: 12,
+    elevation: 6,
   },
   keyInner: {
     alignItems: 'center',
     justifyContent: 'center',
   },
-  instructionRow: {
+  controlRow: {
     flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 24,
-    marginTop: 12,
-    marginBottom: 14,
-  },
-  instructionItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  instrDot: {
-    backgroundColor: THEME.body,
-  },
-  instrDash: {
-    width: 16,
-    height: 3,
-    borderRadius: 2,
-    backgroundColor: THEME.body,
-  },
-  instructionText: {
-    color: THEME.body,
-    fontSize: 11,
-    fontWeight: '600',
-    letterSpacing: 0.3,
-  },
-  controlButtons: {
-    flexDirection: 'row',
-    gap: 10,
+    gap: 8,
     width: '100%',
+    marginTop: 8,
   },
   ctrlBtn: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 5,
-    paddingVertical: 12,
+    gap: 4,
+    paddingVertical: 10,
     backgroundColor: THEME.canvas,
-    borderRadius: 12,
+    borderRadius: 10,
     borderWidth: 1,
     borderColor: THEME.canvasWarm,
   },
@@ -519,7 +474,32 @@ const styles = StyleSheet.create({
   },
   ctrlBtnText: {
     color: THEME.body,
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '700',
+  },
+  instructionRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 20,
+    marginTop: 6,
+  },
+  instructionItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+  },
+  instrDot: {
+    backgroundColor: THEME.body,
+  },
+  instrDash: {
+    width: 13,
+    height: 3,
+    borderRadius: 2,
+    backgroundColor: THEME.body,
+  },
+  instructionText: {
+    color: THEME.body,
+    fontSize: 10,
+    fontWeight: '600',
   },
 });

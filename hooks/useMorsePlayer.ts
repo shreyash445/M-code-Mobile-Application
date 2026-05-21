@@ -7,7 +7,39 @@ const SYMBOL_GAP = DOT_MS;
 const LETTER_GAP = DOT_MS * 3;
 const WORD_GAP = DOT_MS * 7;
 
-const BEEP_URL = 'https://raw.githubusercontent.com/freeCodeCamp/cdn/master/build/testable-projects-fcc/audio/BeepSound.wav';
+const generateBeepData = (): string => {
+  const sampleRate = 8000;
+  const frequency = 800;
+  const numSamples = Math.floor(sampleRate * 0.04);
+  const buffer = new ArrayBuffer(44 + numSamples);
+  const view = new DataView(buffer);
+  const write = (off: number, str: string) => {
+    for (let i = 0; i < str.length; i++) view.setUint8(off + i, str.charCodeAt(i));
+  };
+  write(0, 'RIFF');
+  view.setUint32(4, 36 + numSamples, true);
+  write(8, 'WAVE');
+  write(12, 'fmt ');
+  view.setUint32(16, 16, true);
+  view.setUint16(20, 1, true);
+  view.setUint16(22, 1, true);
+  view.setUint32(24, sampleRate, true);
+  view.setUint32(28, sampleRate, true);
+  view.setUint16(32, 1, true);
+  view.setUint16(34, 8, true);
+  write(36, 'data');
+  view.setUint32(40, numSamples, true);
+  for (let i = 0; i < numSamples; i++) {
+    const sample = Math.sin(2 * Math.PI * frequency * i / sampleRate);
+    view.setUint8(44 + i, Math.floor((sample * 0.4 + 0.5) * 255));
+  }
+  const bytes = new Uint8Array(buffer);
+  let binary = '';
+  for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+  return 'data:audio/wav;base64,' + btoa(binary);
+};
+
+const BEEP_DATA = generateBeepData();
 
 export function useMorsePlayer() {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -18,16 +50,20 @@ export function useMorsePlayer() {
 
   const playBeep = async (duration: number) => {
     if (stopRef.current) return;
-    
+
     setIsActive(true);
     try {
       if (!soundRef.current) {
-        const { sound } = await Audio.Sound.createAsync({ uri: BEEP_URL });
+        const { sound } = await Audio.Sound.createAsync(
+          { uri: BEEP_DATA },
+          { shouldPlay: false }
+        );
         soundRef.current = sound;
       }
-      await soundRef.current.replayAsync();
+      await soundRef.current.setPositionAsync(0);
+      await soundRef.current.playAsync();
       await new Promise(resolve => setTimeout(resolve, duration));
-      await soundRef.current.stopAsync();
+      await soundRef.current.pauseAsync();
     } catch (e) {
       console.warn("Audio play failed", e);
       await new Promise(resolve => setTimeout(resolve, duration));
@@ -69,7 +105,7 @@ export function useMorsePlayer() {
     setIsActive(false);
     setCurrentIndex(-1);
     if (soundRef.current) {
-      soundRef.current.stopAsync();
+      soundRef.current.pauseAsync();
     }
   }, []);
 

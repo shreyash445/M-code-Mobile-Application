@@ -1,26 +1,25 @@
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Animated, Platform } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { THEME } from '../../constants/MorseData';
+import { THEME, MORSE_CODE } from '../../constants/MorseData';
 
-const TYPING_WORDS = ['HELLO', 'WORLD', 'MORSE', 'CODE', 'SOS'];
+const WORD = 'MORSE';
 
 export default function OnboardingScreen() {
-  const [currentWordIdx, setCurrentWordIdx] = useState(0);
-  const fadeAnim = useRef(new Animated.Value(1)).current;
+  const progress = useRef(new Animated.Value(0)).current;
   const floatAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    const interval = setInterval(() => {
+    const loop = Animated.loop(
       Animated.sequence([
-        Animated.timing(fadeAnim, { toValue: 0, duration: 300, useNativeDriver: true }),
-        Animated.timing(fadeAnim, { toValue: 1, duration: 300, useNativeDriver: true }),
-      ]).start();
-      setCurrentWordIdx(prev => (prev + 1) % TYPING_WORDS.length);
-    }, 2000);
-    return () => clearInterval(interval);
-  }, [fadeAnim]);
+        Animated.timing(progress, { toValue: 1, duration: 1200, useNativeDriver: false }),
+        Animated.timing(progress, { toValue: 0, duration: 1200, useNativeDriver: false }),
+      ])
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [progress]);
 
   useEffect(() => {
     Animated.loop(
@@ -30,6 +29,26 @@ export default function OnboardingScreen() {
       ])
     ).start();
   }, [floatAnim]);
+
+  const slotProgress = (index: number) => {
+    const slotStart = index / WORD.length;
+    const slotEnd = (index + 1) / WORD.length;
+    return progress.interpolate({
+      inputRange: [0, slotStart, slotEnd, 1],
+      outputRange: [0, 0, 1, 1],
+      extrapolate: 'clamp',
+    });
+  };
+
+  const reverseSlotProgress = (index: number) => {
+    const slotStart = index / WORD.length;
+    const slotEnd = (index + 1) / WORD.length;
+    return progress.interpolate({
+      inputRange: [0, 1 - slotEnd, 1 - slotStart, 1],
+      outputRange: [1, 1, 0, 0],
+      extrapolate: 'clamp',
+    });
+  };
 
   return (
     <View style={styles.container}>
@@ -42,9 +61,33 @@ export default function OnboardingScreen() {
 
         <Text style={styles.title}>M-Code</Text>
         <Text style={styles.subtitle}>Master Morse Code</Text>
-        <Animated.Text style={[styles.typingWord, { opacity: fadeAnim }]}>
-          {TYPING_WORDS[currentWordIdx]}
-        </Animated.Text>
+
+        <View style={styles.morseAnimRow}>
+          {WORD.split('').map((char, i) => {
+            const sp = slotProgress(i);
+            const rsp = reverseSlotProgress(i);
+            return (
+              <View key={i} style={styles.morseSlot}>
+                <Animated.Text
+                  style={[
+                    styles.morseAnimChar,
+                    { opacity: Animated.subtract(1, Animated.multiply(sp, rsp)) },
+                  ]}
+                >
+                  {char}
+                </Animated.Text>
+                <Animated.Text
+                  style={[
+                    styles.morseAnimCode,
+                    { opacity: Animated.multiply(sp, rsp) },
+                  ]}
+                >
+                  {MORSE_CODE[char]}
+                </Animated.Text>
+              </View>
+            );
+          })}
+        </View>
       </View>
 
       <View style={styles.featureList}>
@@ -150,13 +193,32 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     marginBottom: 32,
   },
-  typingWord: {
-    color: THEME.primary,
-    fontSize: 42,
-    fontWeight: '800',
-    letterSpacing: 8,
-    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
+  morseAnimRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     height: 52,
+    gap: 4,
+  },
+  morseSlot: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: 28,
+  },
+  morseAnimChar: {
+    color: THEME.primary,
+    fontSize: 36,
+    fontWeight: '800',
+    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
+    position: 'absolute',
+  },
+  morseAnimCode: {
+    color: THEME.primary,
+    fontSize: 16,
+    fontWeight: '800',
+    letterSpacing: 1,
+    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
+    position: 'absolute',
   },
   featureList: {
     gap: 18,
