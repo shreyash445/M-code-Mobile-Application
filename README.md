@@ -1,50 +1,103 @@
-# Welcome to your Expo app 👋
+# M-Code
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+> Master Morse Code — Encode, Decode, and Transmit like a telegraph operator.
 
-## Get started
+![Expo](https://img.shields.io/badge/Expo-54-blueviolet?logo=expo)
+![React Native](https://img.shields.io/badge/React_Native-0.76-61dafb?logo=react)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.3-3178c6?logo=typescript)
+![License](https://img.shields.io/badge/license-MIT-green)
 
-1. Install dependencies
+---
 
-   ```bash
-   npm install
-   ```
+## Features
 
-2. Start the app
+| Feature | Description |
+|---|---|
+| **Encode / Decode** | Convert text to Morse code and back in real time |
+| **Audio Playback** | Hear Morse signals with precise timing (dot / dash / gap) |
+| **Signal Lamp** | Visual flashing lamp synchronised with audio output |
+| **Telegraph Key** | Tap dots and dashes with a realistic telegraph interface |
+| **Navigation Tree** | Visual Morse tree that highlights your current path |
+| **Reference Chart** | Complete alphabet, number, and symbol reference grid |
 
-   ```bash
-   npx expo start
-   ```
+## Screens
 
-In the output, you'll find options to open the app in a
+| Onboarding | Encode | Telegraph | Reference |
+|---|---|---|---|
+| <img src="assets/images/icon.png" width="120" /> | Text ↔ Morse translation with playback | Tap-to-input telegraph key with morse tree | Full character reference chart |
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## Tech Stack
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+| Layer | Technology |
+|---|---|
+| Framework | [Expo SDK 54](https://docs.expo.dev/versions/v54.0.0/) |
+| UI | React Native + StyleSheet |
+| Routing | [Expo Router](https://docs.expo.dev/router/introduction) (file‑based) |
+| Audio | `expo-av` |
+| Icons | `@expo/vector-icons` (MaterialCommunityIcons) |
+| Animations | React Native `Animated` API |
+| SVG | `react-native-svg` |
+| Language | TypeScript (strict mode) |
 
-## Get a fresh project
-
-When you're ready, run:
+## Getting Started
 
 ```bash
-npm run reset-project
+# 1. Install dependencies
+npm install
+
+# 2. Start the Expo dev server
+npx expo start
+
+# 3. Open on your device
+#    - Scan the QR code with Expo Go
+#    - Press 'a' for Android emulator
+#    - Press 'i' for iOS simulator
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## Project Structure
 
-## Learn more
+```
+app/
+├── _layout.tsx              # Root layout (auth / tabs switching)
+├── index.tsx                # Entry point — redirects to onboarding
+├── (auth)/                  # Authentication group
+│   ├── _layout.tsx
+│   ├── index.tsx            # Onboarding / landing screen
+│   ├── sign-in.tsx
+│   └── sign-up.tsx
+└── (tabs)/                  # Main app tabs
+    ├── _layout.tsx           # Tab navigator
+    ├── index.tsx             # Encode screen
+    ├── telegraph.tsx         # Telegraph key screen
+    └── explore.tsx           # Reference chart screen
 
-To learn more about developing your project with Expo, look at the following resources:
+components/
+├── MorseTree.tsx            # SVG Morse code navigation tree
+└── SignalLamp.tsx           # Animated signal lamp indicator
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+constants/
+└── MorseData.ts             # Morse mappings, tree data, theme palette
 
-## Join the community
+hooks/
+└── useMorsePlayer.ts        # Audio playback hook for morse sequences
+```
 
-Join our community of developers creating universal apps.
+## Recent Updates
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+- **Auth flow** — Onboarding, sign-in, and sign-up screens with guest mode
+- **Telegraph layout fix** — Output section and tree now fit on screen without overlap
+- **Reference heading fix** — Removed duplicate header from the Reference tab
+- **Code cleanup** — Removed unused imports and variables across all files
+- **Zero warnings** — ESLint and TypeScript both pass clean
+
+## Roadmap
+
+- [ ] Persistent auth state
+- [ ] Morse code speed adjustment
+- [ ] History / saved messages
+- [ ] Haptic feedback customisation
+- [ ] Dark / light theme toggle
+
+## License
+
+MIT

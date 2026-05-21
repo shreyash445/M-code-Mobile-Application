@@ -1,33 +1,69 @@
 import { Tabs } from 'expo-router';
-import React from 'react';
-
-import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { THEME } from '../../constants/MorseData';
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: false,
-        tabBarButton: HapticTab,
+        tabBarActiveTintColor: THEME.primary,
+        tabBarInactiveTintColor: THEME.mute,
+        tabBarStyle: {
+          backgroundColor: THEME.canvasSoft,
+          borderTopColor: THEME.canvasWarm,
+          borderTopWidth: 1,
+          height: 72,
+          paddingBottom: 12,
+          paddingTop: 8,
+        },
+        tabBarLabelStyle: {
+          fontSize: 11,
+          fontWeight: '700',
+          letterSpacing: 0.5,
+          marginTop: 4,
+        },
+        headerStyle: {
+          backgroundColor: THEME.canvas,
+          borderBottomColor: THEME.canvasWarm,
+          borderBottomWidth: 1,
+          elevation: 0,
+          shadowOpacity: 0,
+        },
+        headerTintColor: THEME.ink,
+        headerTitleStyle: {
+          fontWeight: '700',
+          fontSize: 18,
+          letterSpacing: 1.5,
+        },
+        tabBarIconStyle: {
+          marginTop: 4,
+        },
       }}>
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+          title: 'Encode',
+          tabBarIcon: ({ color }) => (
+            <MaterialCommunityIcons name="swap-horizontal" size={22} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="telegraph"
+        options={{
+          title: 'Telegraph',
+          tabBarIcon: ({ color }) => (
+            <MaterialCommunityIcons name="radio-tower" size={22} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
         name="explore"
         options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          title: 'Reference',
+          tabBarIcon: ({ color }) => (
+            <MaterialCommunityIcons name="book-open-variant" size={22} color={color} />
+          ),
         }}
       />
     </Tabs>

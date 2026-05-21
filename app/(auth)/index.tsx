@@ -1,0 +1,240 @@
+import { useState, useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Animated, Platform } from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { router } from 'expo-router';
+import { THEME } from '../../constants/MorseData';
+
+const TYPING_WORDS = ['HELLO', 'WORLD', 'MORSE', 'CODE', 'SOS'];
+
+export default function OnboardingScreen() {
+  const [currentWordIdx, setCurrentWordIdx] = useState(0);
+  const fadeAnim = useRef(new Animated.Value(1)).current;
+  const floatAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      Animated.sequence([
+        Animated.timing(fadeAnim, { toValue: 0, duration: 300, useNativeDriver: true }),
+        Animated.timing(fadeAnim, { toValue: 1, duration: 300, useNativeDriver: true }),
+      ]).start();
+      setCurrentWordIdx(prev => (prev + 1) % TYPING_WORDS.length);
+    }, 2000);
+    return () => clearInterval(interval);
+  }, [fadeAnim]);
+
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(floatAnim, { toValue: -8, duration: 1800, useNativeDriver: true }),
+        Animated.timing(floatAnim, { toValue: 0, duration: 1800, useNativeDriver: true }),
+      ])
+    ).start();
+  }, [floatAnim]);
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.topSection}>
+        <Animated.View style={[styles.badgeContainer, { transform: [{ translateY: floatAnim }] }]}>
+          <View style={styles.badge}>
+            <MaterialCommunityIcons name="radio-tower" size={32} color={THEME.primary} />
+          </View>
+        </Animated.View>
+
+        <Text style={styles.title}>M-Code</Text>
+        <Text style={styles.subtitle}>Master Morse Code</Text>
+        <Animated.Text style={[styles.typingWord, { opacity: fadeAnim }]}>
+          {TYPING_WORDS[currentWordIdx]}
+        </Animated.Text>
+      </View>
+
+      <View style={styles.featureList}>
+        <View style={styles.featureRow}>
+          <View style={styles.featureIcon}>
+            <MaterialCommunityIcons name="swap-horizontal-bold" size={18} color={THEME.primary} />
+          </View>
+          <View style={styles.featureText}>
+            <Text style={styles.featureTitle}>Encode & Decode</Text>
+            <Text style={styles.featureDesc}>Convert text to Morse and back instantly</Text>
+          </View>
+        </View>
+        <View style={styles.featureRow}>
+          <View style={styles.featureIcon}>
+            <MaterialCommunityIcons name="lightning-bolt" size={18} color={THEME.primary} />
+          </View>
+          <View style={styles.featureText}>
+            <Text style={styles.featureTitle}>Telegraph Key</Text>
+            <Text style={styles.featureDesc}>Tap Morse code with a realistic telegraph key</Text>
+          </View>
+        </View>
+        <View style={styles.featureRow}>
+          <View style={styles.featureIcon}>
+            <MaterialCommunityIcons name="book-open-variant" size={18} color={THEME.primary} />
+          </View>
+          <View style={styles.featureText}>
+            <Text style={styles.featureTitle}>Reference Chart</Text>
+            <Text style={styles.featureDesc}>Complete Morse code alphabet at your fingertips</Text>
+          </View>
+        </View>
+      </View>
+
+      <View style={styles.bottomSection}>
+        <TouchableOpacity
+          style={styles.primaryButton}
+          onPress={() => router.push('/(auth)/sign-in')}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.primaryButtonText}>Sign In</Text>
+          <MaterialCommunityIcons name="arrow-right" size={20} color={THEME.canvas} />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.secondaryButton}
+          onPress={() => router.push('/(auth)/sign-up')}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.secondaryButtonText}>Create Account</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.skipButton}
+          onPress={() => router.replace('/(tabs)')}
+          activeOpacity={0.6}
+        >
+          <Text style={styles.skipText}>Continue as Guest</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: THEME.canvas,
+    paddingHorizontal: 28,
+    justifyContent: 'space-between',
+  },
+  topSection: {
+    alignItems: 'center',
+    paddingTop: 80,
+  },
+  badgeContainer: {
+    marginBottom: 24,
+  },
+  badge: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: THEME.canvasSoft,
+    borderWidth: 2,
+    borderColor: THEME.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: THEME.primary,
+    shadowOpacity: 0.3,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 0 },
+    elevation: 8,
+  },
+  title: {
+    color: THEME.ink,
+    fontSize: 48,
+    fontWeight: '800',
+    letterSpacing: -1,
+    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
+    marginBottom: 4,
+  },
+  subtitle: {
+    color: THEME.body,
+    fontSize: 16,
+    fontWeight: '600',
+    letterSpacing: 3,
+    textTransform: 'uppercase',
+    marginBottom: 32,
+  },
+  typingWord: {
+    color: THEME.primary,
+    fontSize: 42,
+    fontWeight: '800',
+    letterSpacing: 8,
+    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
+    height: 52,
+  },
+  featureList: {
+    gap: 18,
+    paddingVertical: 8,
+  },
+  featureRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+  },
+  featureIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    backgroundColor: THEME.canvasSoft,
+    borderWidth: 1,
+    borderColor: THEME.canvasWarm,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  featureText: {
+    flex: 1,
+  },
+  featureTitle: {
+    color: THEME.ink,
+    fontSize: 15,
+    fontWeight: '700',
+    marginBottom: 2,
+  },
+  featureDesc: {
+    color: THEME.body,
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  bottomSection: {
+    paddingBottom: 48,
+    gap: 12,
+  },
+  primaryButton: {
+    backgroundColor: THEME.primary,
+    borderRadius: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 16,
+    gap: 8,
+    shadowColor: THEME.primary,
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 6,
+  },
+  primaryButtonText: {
+    color: THEME.canvas,
+    fontSize: 16,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+  },
+  secondaryButton: {
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderColor: THEME.primary,
+    paddingVertical: 15,
+    alignItems: 'center',
+  },
+  secondaryButtonText: {
+    color: THEME.primary,
+    fontSize: 15,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+  },
+  skipButton: {
+    alignItems: 'center',
+    paddingVertical: 10,
+  },
+  skipText: {
+    color: THEME.mute,
+    fontSize: 13,
+    fontWeight: '600',
+  },
+});
